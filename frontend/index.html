@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verdikt — Verdicts, not votes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10141A;
+    --ink-2:#161B22;
+    --paper:#E4E1D6;
+    --paper-dim:#B8B6AC;
+    --seal:#B98A2E;
+    --seal-bright:#D2A544;
+    --verified:#3F7A5D;
+    --dispute:#8C3B2E;
+    --muted:#9CA3A8;
+    --line: rgba(228,225,214,0.14);
+    --line-strong: rgba(228,225,214,0.24);
+    --serif: 'Fraunces', serif;
+    --sans: 'IBM Plex Sans', -apple-system, sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--sans);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{ color:inherit; }
+  ::selection{ background:var(--seal); color:var(--ink); }
+  :focus-visible{ outline:2px solid var(--seal-bright); outline-offset:3px; }
+
+  .wrap{ max-width:1120px; margin:0 auto; padding:0 32px; }
+
+  header{
+    border-bottom:1px solid var(--line);
+    position:sticky; top:0;
+    background:rgba(16,20,26,0.88);
+    backdrop-filter:blur(8px);
+    z-index:10;
+  }
+  nav.wrap{ display:flex; align-items:center; justify-content:space-between; padding:20px 32px; }
+  .wordmark{ font-family:var(--serif); font-size:22px; font-weight:600; text-decoration:none; color:var(--paper); }
+  .wordmark span{ color:var(--seal-bright); }
+  .navlinks{ display:flex; gap:32px; align-items:center; font-size:15px; }
+  .navlinks a{ text-decoration:none; color:var(--paper-dim); transition:color .15s; }
+  .navlinks a:hover{ color:var(--paper); }
+  .btn-nav{ border:1px solid var(--line-strong); padding:9px 18px; border-radius:3px; font-size:14px; text-decoration:none; color:var(--paper); transition:border-color .15s, background .15s; }
+  .btn-nav:hover{ border-color:var(--seal); background:rgba(185,138,46,0.08); }
+  @media (max-width:720px){ .navlinks a:not(.btn-nav){ display:none; } }
+
+  .hero{ padding:96px 0 88px; border-bottom:1px solid var(--line); }
+  .hero-grid{ display:grid; grid-template-columns:1.1fr 0.9fr; gap:64px; align-items:start; }
+  h1{ font-family:var(--serif); font-weight:500; font-size:clamp(34px, 4.6vw, 54px); line-height:1.12; letter-spacing:-0.01em; margin:0 0 24px; }
+  .hero p.lede{ font-size:18px; color:var(--paper-dim); max-width:46ch; margin:0 0 36px; }
+  .hero-cta{ display:flex; gap:14px; flex-wrap:wrap; }
+  .btn-primary, .btn-secondary{ font-size:15px; padding:13px 24px; border-radius:3px; text-decoration:none; display:inline-block; font-weight:500; border:none; cursor:pointer; font-family:var(--sans); }
+  .btn-primary{ background:var(--seal); color:#181209; transition:background .15s; }
+  .btn-primary:hover{ background:var(--seal-bright); }
+  .btn-primary:disabled{ background:var(--line-strong); color:var(--muted); cursor:not-allowed; }
+  .btn-secondary{ border:1px solid var(--line-strong); color:var(--paper); background:transparent; transition:border-color .15s; }
+  .btn-secondary:hover{ border-color:var(--paper-dim); }
+
+  /* ---------- LIVE CASE PANEL ---------- */
+  .case-panel{
+    background:var(--ink-2);
+    border:1px solid var(--line-strong);
+    border-radius:4px;
+    padding:24px;
+  }
+  .connect-row{
+    display:flex; align-items:center; gap:12px;
+    margin-bottom:18px; padding-bottom:16px;
+    border-bottom:1px solid var(--line);
+    font-family:var(--mono); font-size:12px; color:var(--muted);
+  }
+  .connect-row button{
+    font-family:var(--mono); font-size:12px;
+    background:transparent; border:1px solid var(--line-strong);
+    color:var(--paper); padding:7px 12px; border-radius:3px; cursor:pointer;
+  }
+  .connect-row button:hover{ border-color:var(--seal); }
+  .connect-row button:disabled{ opacity:.5; cursor:default; }
+
+  .case-row{ display:flex; justify-content:space-between; font-family:var(--mono); font-size:12px; color:var(--muted); margin-bottom:14px; }
+  .case-title{ font-family:var(--serif); font-size:19px; margin:0 0 6px; }
+  .case-desc{ font-size:14px; color:var(--paper-dim); margin:0 0 20px; }
+
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-family:var(--mono); }
+  .field input, .field textarea{
+    width:100%; background:var(--ink); border:1px solid var(--line-strong);
+    color:var(--paper); border-radius:3px; padding:10px 12px;
+    font-family:var(--sans); font-size:14px;
+  }
+  .field textarea{ resize:vertical; min-height:64px; }
+
+  .state-filed #file-case-form, .state-resolved #file-case-form{ display:none; }
+  .state-idle #post-file-view{ display:none; }
+  #post-file-view{ display:block; }
+
+  .validators{ display:flex; gap:10px; margin:18px 0; }
+  .v-mark{
+    flex:1; border:1px solid var(--line-strong); border-radius:3px;
+    padding:10px 8px; text-align:center; font-family:var(--mono);
+    font-size:11px; color:var(--muted);
+    opacity:0.4; transition:opacity .3s;
+  }
+  .v-mark .check{ display:block; font-size:16px; color:var(--verified); margin-bottom:4px; opacity:0; transition:opacity .3s; }
+  .v-mark.checked{ opacity:1; }
+  .v-mark.checked .check{ opacity:1; }
+
+  .stamp{
+    display:none;
+    border:2px solid var(--seal);
+    color:var(--seal-bright);
+    font-family:var(--serif); font-weight:600; font-size:15px;
+    text-align:center; padding:14px; border-radius:3px;
+    letter-spacing:0.03em; margin-top:6px;
+  }
+  .stamp.stamp-approve{ border-color:var(--verified); color:var(--verified); }
+  .stamp.stamp-reject{ border-color:var(--dispute); color:#C97363; }
+
+  #resolve-btn{ width:100%; margin-top:6px; }
+
+  /* ---------- SECTIONS ---------- */
+  section{ padding:88px 0; border-bottom:1px solid var(--line); }
+  h2{ font-family:var(--serif); font-weight:500; font-size:clamp(26px, 3vw, 34px); margin:0 0 20px; max-width:20ch; }
+  .section-lede{ font-size:16.5px; color:var(--paper-dim); max-width:60ch; margin:0 0 48px; }
+
+  .problem-list{ list-style:none; margin:0; padding:0; display:grid; gap:1px; background:var(--line); border:1px solid var(--line); }
+  .problem-list li{ background:var(--ink); padding:22px 24px; font-size:16px; display:flex; gap:16px; align-items:baseline; }
+  .problem-list .mark{ color:var(--dispute); font-family:var(--mono); font-size:13px; flex-shrink:0; }
+
+  .process{ display:grid; grid-template-columns:1fr 1fr; gap:40px 56px; }
+  .step{ border-top:1px solid var(--line-strong); padding-top:20px; }
+  .step .num{ font-family:var(--mono); color:var(--seal-bright); font-size:13px; }
+  .step h3{ font-family:var(--serif); font-weight:500; font-size:20px; margin:8px 0 8px; }
+  .step p{ color:var(--paper-dim); font-size:15px; margin:0; }
+  @media (max-width:720px){ .process{ grid-template-columns:1fr; } }
+
+  .genlayer-block{ border-left:3px solid var(--seal); padding-left:28px; max-width:68ch; }
+  .genlayer-block p{ font-size:17px; color:var(--paper-dim); margin:0 0 16px; }
+  .genlayer-block strong{ color:var(--paper); font-weight:600; }
+
+  .docket{ border-top:1px solid var(--line-strong); }
+  .docket-entry{ display:grid; grid-template-columns:110px 1fr 1.4fr; gap:24px; padding:26px 0; border-bottom:1px solid var(--line); align-items:start; }
+  .docket-entry .caseno{ font-family:var(--mono); font-size:13px; color:var(--muted); padding-top:2px; }
+  .docket-entry h3{ font-family:var(--serif); font-weight:500; font-size:19px; margin:0; }
+  .docket-entry p{ font-size:15px; color:var(--paper-dim); margin:0; }
+  @media (max-width:720px){ .docket-entry{ grid-template-columns:1fr; gap:6px; } }
+
+  footer{ padding:48px 0 60px; }
+  footer .wordmark{ font-size:18px; }
+  footer p{ color:var(--muted); font-size:14px; max-width:50ch; margin:14px 0 22px; }
+  .footer-links{ display:flex; gap:24px; font-size:14px; }
+  .footer-links a{ text-decoration:none; color:var(--paper-dim); }
+  .footer-links a:hover{ color:var(--paper); }
+
+  @media (max-width:720px){
+    .hero-grid{ grid-template-columns:1fr; }
+    section{ padding:64px 0; }
+    .hero{ padding:64px 0 56px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="wrap">
+    <a href="#" class="wordmark">Verdikt<span>.</span></a>
+    <div class="navlinks">
+      <a href="#how">How it works</a>
+      <a href="#genlayer">Protocol</a>
+      <a href="#cases">Case types</a>
+      <a href="#demo" class="btn-nav">Submit a case</a>
+    </div>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid" id="demo">
+    <div>
+      <h1>Every dispute deserves a verdict, not a vote.</h1>
+      <p class="lede">Verdikt is an agentic adjudication layer for on-chain communities. Independent AI validators review the evidence and settle bounty disputes — built on GenLayer's Intelligent Contracts.</p>
+      <div class="hero-cta">
+        <a href="#genlayer" class="btn-secondary">Read the protocol</a>
+        <a href="#demo" class="btn-primary">Try the live demo</a>
+      </div>
+    </div>
+
+    <div class="case-panel state-idle" id="case-panel">
+  <div class="connect-row">
+    <button id="connect-btn" type="button">Connect demo wallet</button>
+    <span id="connect-status">Not connected</span>
+    <button id="copy-address-btn" type="button" style="display:none;">Copy address</button>
+  </div>
+
+  <div class="case-row">
+    <span id="case-status">NO ACTIVE CASE</span>
+  </div>
+
+      <form id="file-case-form">
+        <div class="field">
+          <label for="spec-input">Spec (what was promised)</label>
+          <textarea id="spec-input" required placeholder="Add a dark-mode toggle to the settings page that persists across sessions."></textarea>
+        </div>
+        <div class="field">
+          <label for="url-input">Submission URL (PR / evidence link)</label>
+          <input id="url-input" type="url" required placeholder="https://github.com/org/repo/pull/88">
+        </div>
+        <div class="field">
+          <label for="claimant-input">Claimant address</label>
+          <input id="claimant-input" type="text" required placeholder="0x...">
+        </div>
+        <div class="field">
+          <label for="payout-input">Payout (wei)</label>
+          <input id="payout-input" type="number" min="0" value="0" required>
+        </div>
+        <button type="submit" class="btn-primary" disabled style="width:100%;">File case</button>
+      </form>
+
+      <div id="post-file-view">
+        <h3 class="case-title" id="case-title-text">Case No. —</h3>
+        <p class="case-desc" id="case-desc-text">File a case above to begin.</p>
+        <div class="validators">
+          <div class="v-mark"><span class="check">✓</span>Validator A</div>
+          <div class="v-mark"><span class="check">✓</span>Validator B</div>
+          <div class="v-mark"><span class="check">✓</span>Validator C</div>
+        </div>
+        <div class="stamp" id="stamp">VERDICT REACHED</div>
+        <button id="new-case-btn" class="btn-secondary" style="width:100%; margin-top:10px; display:none;">File another case</button>
+        <button id="resolve-btn" class="btn-secondary">Resolve case</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="problem">
+  <div class="wrap">
+    <h2>The bottleneck isn't funding. It's review.</h2>
+    <p class="section-lede">Most DAOs don't have a standing review committee — they have one exhausted mod, a pinned doc nobody updates, and a dispute channel everyone dreads opening.</p>
+    <ul class="problem-list">
+      <li><span class="mark">01</span> A PR merges, but did it meet the spec? Nobody quite agrees.</li>
+      <li><span class="mark">02</span> A post gets flagged. Was it spam, or just unpopular?</li>
+      <li><span class="mark">03</span> A contributor says they delivered. The multisig isn't sure.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <h2>How a case gets settled</h2>
+    <p class="section-lede">No vote count, no mod on call at 2am — just evidence, reasoning, and a verdict that executes itself.</p>
+    <div class="process">
+      <div class="step"><span class="num">1</span><h3>File the case</h3><p>A claim is submitted with its evidence — a PR, a message thread, a delivery log, anything the dispute actually hinges on.</p></div>
+      <div class="step"><span class="num">2</span><h3>Validators reason</h3><p>Independent LLM validators read the same evidence against the case's stated terms and each reach their own judgment.</p></div>
+      <div class="step"><span class="num">3</span><h3>Consensus resolves</h3><p>Where validators disagree, GenLayer's Optimistic Democracy settles it into a single outcome using the case's equivalence rule.</p></div>
+      <div class="step"><span class="num">4</span><h3>Verdict executes</h3><p>Payout releases, a post is restored, or reputation updates — automatically, on-chain, no follow-up vote required.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="genlayer">
+  <div class="wrap">
+    <h2>Built on GenLayer</h2>
+    <div class="genlayer-block">
+      <p>Verdikt runs on <strong>GenLayer's Intelligent Contracts</strong> — contracts that can read natural language, pull in outside context, and make non-deterministic calls the way a person would, instead of only executing fixed logic.</p>
+      <p>Where independent validators would normally disagree, GenLayer's <strong>Optimistic Democracy</strong> consensus resolves that disagreement into one outcome, using an equivalence principle each case defines up front.</p>
+    </div>
+  </div>
+</section>
+
+<section id="cases">
+  <div class="wrap">
+    <h2>Case types</h2>
+    <p class="section-lede">Verdikt ships with the dispute type communities file most often. Each defines its own evidence, terms, and equivalence rule.</p>
+    <div class="docket">
+      <div class="docket-entry"><span class="caseno">No. 001</span><h3>Bounty Verification</h3><p>Did the submitted work actually meet the spec the bounty was posted for? Live in this demo.</p></div>
+      <div class="docket-entry"><span class="caseno">No. 002</span><h3>Moderation Appeal</h3><p>Was a flagged post actually a violation, or just an unpopular opinion? Coming next.</p></div>
+      <div class="docket-entry"><span class="caseno">No. 003</span><h3>Reputation Dispute</h3><p>Did a contributor deliver on what they told the community they'd deliver? Coming next.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <a href="#" class="wordmark">Verdikt<span>.</span></a>
+    <p>An agentic dispute-resolution layer for on-chain communities, built on GenLayer's Intelligent Contracts.</p>
+    <div class="footer-links">
+      <a href="#">GitHub</a>
+      <a href="#">Docs</a>
+      <a href="#">X / Twitter</a>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

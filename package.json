@@ -1,0 +1,13 @@
+{
+  "name": "verdikt",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "node scripts/deploy.mjs",
+    "serve": "npx serve frontend"
+  },
+  "dependencies": {
+    "genlayer-js": "latest"
+  }
+}
