@@ -2,13 +2,28 @@
 // this runs with zero build step — good for a hackathon demo. For a
 // production build, `npm install genlayer-js` and import it normally
 // through your bundler instead.
+//
+// NOTE: Studio Next (chain 61997) is a separate, more experimental
+// network from the main Studio/studionet (chain 61999) this project
+// was originally built and tested against. There's an open, unresolved
+// bug report (genlayer-cli issue #421) about deploys failing on this
+// network with a FeesDistributionMissing error. If writes below fail
+// in a way that doesn't match anything we've debugged before, this is
+// the likely reason — switch back to the studionet version if so.
 
 import { createClient, createAccount } from "https://esm.sh/genlayer-js";
-import { studionet } from "https://esm.sh/genlayer-js/chains";
+
+// Studio Next has no built-in preset in genlayer-js, so it's defined
+// manually here instead of imported from genlayer-js/chains.
+const studioNext = {
+  id: 61997,
+  name: "GenLayer Studio Next",
+  rpcUrls: { default: { http: ["https://studio-dev.genlayer.com/api"] } },
+};
 
 // ---- CONFIG -----------------------------------------------------------
-// Paste the address you got from deploying the contract here.
-const CONTRACT_ADDRESS = "0x7344342e5313c3A6dde0DD8D9236D62283CCC193";
+const CONTRACT_ADDRESS = "0xa7aBcF4B86539E940c556038c1598D21cd9bd8f6";
+const DEMO_PRIVATE_KEY = "0x9ca5a3023309c79fb164e11e71746eed5a952ea3ae757a0073529fb0781bcc09";
 // -------------------------------------------------------------------
 
 let account = null;
@@ -43,11 +58,9 @@ function genCaseId() {
   return "case-" + Date.now();
 }
 
-const DEMO_PRIVATE_KEY = "0x9ca5a3023309c79fb164e11e71746eed5a952ea3ae757a0073529fb0781bcc09";
-
 async function connect() {
   account = createAccount(DEMO_PRIVATE_KEY);
-  client = createClient({ chain: studionet, account });
+  client = createClient({ chain: studioNext, account });
 
   els.connectStatus.textContent = `Connected as ${account.address.slice(0, 6)}…${account.address.slice(-4)}`;
   els.connectBtn.disabled = true;
@@ -56,10 +69,7 @@ async function connect() {
   els.copyBtn.style.display = "inline-block";
   els.copyBtn.dataset.address = account.address;
 
-  console.log(
-    "Demo account created. Fund it from the GenLayer Studio faucet to actually send transactions:",
-    account.address
-  );
+  console.log("Connected demo account (Studio Next):", account.address);
 }
 
 async function fileCase({ spec, submissionUrl, claimant, payoutWei }) {
@@ -86,8 +96,6 @@ async function resolveCase(caseId) {
     args: [caseId],
     value: 0n,
   });
-  // FINALIZED because we actually need the validator-consensus result,
-  // not just the leader's initial proposal.
   await client.waitForTransactionReceipt({
     hash,
     status: "FINALIZED",
@@ -159,8 +167,6 @@ els.resolveBtn.addEventListener("click", async () => {
   try {
     await resolveCase(currentCaseId);
 
-    // Reveal checkmarks as we confirm each part of the real result —
-    // purely a UX staggering, the underlying data is already final.
     for (const v of els.validatorEls) {
       await new Promise((r) => setTimeout(r, 350));
       v.classList.add("checked");
